@@ -8,7 +8,7 @@ After Login:
 
 ## Project info
 
-**URL**: https://lovable.dev/projects/018fdc35-bcac-4a75-a987-3bd256ac0de7
+**URL**: [https://lovable.dev/projects/018fdc35-bcac-4a75-a987-3bd256ac0de7](https://preview--glow-board-manager.lovable.app/)
 
 ## How can I edit this code?
 
