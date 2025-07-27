@@ -63,6 +63,15 @@ Dark theme with neon accents and glow effects
     --shadow-glow-accent: 0 0 20px hsl(var(--accent) / 0.3), 0 0 40px hsl(var(--accent) / 0.1);
     --shadow-dark: 0 4px 20px hsl(220 13% 5% / 0.4);
 
+    /* JoJo Theme Colors */
+    --jojo-purple: 270 80% 50%;
+    --jojo-pink: 320 100% 75%;
+    --jojo-gold: 45 100% 60%;
+    --jojo-blue: 200 100% 70%;
+    --jojo-gradient: linear-gradient(135deg, hsl(var(--jojo-purple)), hsl(var(--jojo-pink)));
+    --jojo-neon-glow: 0 0 30px hsl(var(--jojo-pink) / 0.6);
+    --jojo-text-shadow: 2px 2px 0 hsl(var(--jojo-purple)), -2px -2px 0 hsl(var(--jojo-purple)), 2px -2px 0 hsl(var(--jojo-purple)), -2px 2px 0 hsl(var(--jojo-purple));
+
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
@@ -130,6 +139,36 @@ Dark theme with neon accents and glow effects
   
   .bg-gradient-dark {
     background: var(--gradient-dark);
+  }
+  
+  /* JoJo Styles */
+  .jojo-gradient {
+    background: var(--jojo-gradient);
+  }
+  
+  .jojo-text {
+    text-shadow: var(--jojo-text-shadow);
+    font-weight: 900;
+    letter-spacing: 0.05em;
+  }
+  
+  .jojo-glow {
+    box-shadow: var(--jojo-neon-glow);
+  }
+  
+  .jojo-animate {
+    animation: jojo-pulse 2s ease-in-out infinite alternate;
+  }
+  
+  @keyframes jojo-pulse {
+    0% {
+      transform: scale(1);
+      filter: hue-rotate(0deg);
+    }
+    100% {
+      transform: scale(1.02);
+      filter: hue-rotate(10deg);
+    }
   }
 }
 

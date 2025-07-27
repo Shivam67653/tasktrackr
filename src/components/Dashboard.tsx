@@ -4,7 +4,8 @@ import { TaskColumn, Task } from './TaskColumn';
 import { TaskModal } from './TaskModal';
 import { BoardModal } from './BoardModal';
 import { Button } from '@/components/ui/button';
-import { MoreHorizontal, Star } from 'lucide-react';
+import { MoreHorizontal, Star, LogOut } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Board {
   id: string;
@@ -54,6 +55,7 @@ const initialTasks: Task[] = [
 ];
 
 export function Dashboard() {
+  const { user, logout } = useAuth();
   const [boards, setBoards] = useState<Board[]>(initialBoards);
   const [tasks, setTasks] = useState<Task[]>(initialTasks);
   const [activeBoard, setActiveBoard] = useState<string>(initialBoards[0].id);
@@ -147,9 +149,21 @@ export function Dashboard() {
                 </>
               )}
             </div>
-            <Button variant="ghost" size="sm" className="hover-glow-primary">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">{user?.avatar}</span>
+                <span className="text-foreground font-medium">{user?.username}</span>
+              </div>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={logout}
+                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </header>
 
