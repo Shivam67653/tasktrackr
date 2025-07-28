@@ -6,6 +6,7 @@ interface User {
   username: string;
   avatar?: string;
   stand?: string;
+  imageUrl?: string;
 }
 
 interface AuthContextType {
@@ -18,16 +19,56 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// JoJo character avatars for random assignment
+// JoJo character avatars with actual image URLs
 const jojoAvatars = [
-  { emoji: '⭐', name: 'Jotaro Kujo', stand: 'Star Platinum' },
-  { emoji: '🌍', name: 'DIO', stand: 'The World' },
-  { emoji: '🌟', name: 'Giorno Giovanna', stand: 'Gold Experience' },
-  { emoji: '💜', name: 'Josuke Higashikata', stand: 'Crazy Diamond' },
-  { emoji: '🔥', name: 'Joseph Joestar', stand: 'Hermit Purple' },
-  { emoji: '⚡', name: 'Jonathan Joestar', stand: 'Hamon' },
-  { emoji: '🌊', name: 'Jolyne Cujoh', stand: 'Stone Free' },
-  { emoji: '🎭', name: 'Johnny Joestar', stand: 'Tusk' }
+  { 
+    emoji: '⭐', 
+    name: 'Jotaro Kujo', 
+    stand: 'Star Platinum',
+    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '🌍', 
+    name: 'DIO', 
+    stand: 'The World',
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '🌟', 
+    name: 'Giorno Giovanna', 
+    stand: 'Gold Experience',
+    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '💜', 
+    name: 'Josuke Higashikata', 
+    stand: 'Crazy Diamond',
+    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '🔥', 
+    name: 'Joseph Joestar', 
+    stand: 'Hermit Purple',
+    imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '⚡', 
+    name: 'Jonathan Joestar', 
+    stand: 'Hamon Energy',
+    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '🌊', 
+    name: 'Jolyne Cujoh', 
+    stand: 'Stone Free',
+    imageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
+  },
+  { 
+    emoji: '🎭', 
+    name: 'Johnny Joestar', 
+    stand: 'Tusk Act 4',
+    imageUrl: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=100&h=100&fit=crop&crop=face'
+  }
 ];
 
 // Mock users data - in real app this would be in a database
@@ -38,7 +79,8 @@ const mockUsers = [
     password: 'starplatinum',
     username: 'Jotaro Kujo',
     avatar: '⭐',
-    stand: 'Star Platinum'
+    stand: 'Star Platinum',
+    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop&crop=face'
   },
   {
     id: '2',
@@ -46,7 +88,8 @@ const mockUsers = [
     password: 'theworld',
     username: 'DIO',
     avatar: '🌍',
-    stand: 'The World'
+    stand: 'The World',
+    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
   }
 ];
 
@@ -116,7 +159,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         email: foundUser.email,
         username: foundUser.username,
         avatar: foundUser.avatar,
-        stand: foundUser.stand
+        stand: foundUser.stand,
+        imageUrl: foundUser.imageUrl
       };
       
       // Mock JWT token
@@ -157,7 +201,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       password,
       username,
       avatar: randomJojo.emoji,
-      stand: randomJojo.stand
+      stand: randomJojo.stand,
+      imageUrl: randomJojo.imageUrl
     };
     
     mockUsers.push(newUser);
@@ -167,7 +212,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email: newUser.email,
       username: newUser.username,
       avatar: newUser.avatar,
-      stand: newUser.stand
+      stand: newUser.stand,
+      imageUrl: newUser.imageUrl
     };
     
     // Mock JWT token

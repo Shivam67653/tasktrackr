@@ -1,12 +1,7 @@
 import { useState } from 'react';
 import { Plus, Folder, Settings, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-
-interface Board {
-  id: string;
-  name: string;
-  color: string;
-}
+import { Board } from '@/contexts/TaskContext';
 
 interface SidebarProps {
   boards: Board[];

@@ -6,12 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Task } from './TaskColumn';
+import { Task } from '@/contexts/TaskContext';
 
 interface TaskModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (task: Omit<Task, 'id' | 'createdAt'>) => void;
+  onSave: (task: Omit<Task, 'id' | 'createdAt' | 'userId'>) => void;
   task?: Task | null;
   defaultStatus?: Task['status'];
 }

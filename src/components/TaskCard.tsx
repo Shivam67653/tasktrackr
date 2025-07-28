@@ -1,7 +1,7 @@
 import { Calendar, Edit2, Trash2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Task } from './TaskColumn';
+import { Task } from '@/contexts/TaskContext';
 
 interface TaskCardProps {
   task: Task;

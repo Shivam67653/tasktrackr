@@ -1,15 +1,7 @@
 import { Plus, MoreHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TaskCard } from './TaskCard';
-
-export interface Task {
-  id: string;
-  title: string;
-  description: string;
-  status: 'todo' | 'in-progress' | 'done';
-  deadline?: string;
-  createdAt: string;
-}
+import { Task } from '@/contexts/TaskContext';
 
 interface TaskColumnProps {
   title: string;
