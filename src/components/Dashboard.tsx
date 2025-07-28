@@ -13,41 +13,41 @@ interface Board {
   color: string;
 }
 
-// Mock data
+// Mock data - JoJo themed boards
 const initialBoards: Board[] = [
-  { id: '1', name: 'Marketing Campaign', color: '#00bfff' },
-  { id: '2', name: 'Dev Sprint 1', color: '#9932cc' },
-  { id: '3', name: 'Product Launch', color: '#00ff7f' }
+  { id: '1', name: 'Stand User Missions', color: '#9932cc' },
+  { id: '2', name: 'Bizarre Adventure Tasks', color: '#ff1493' },
+  { id: '3', name: 'Golden Experience Goals', color: '#ffd700' }
 ];
 
 const initialTasks: Task[] = [
   {
     id: '1',
-    title: 'Design landing page mockups',
-    description: 'Create high-fidelity mockups for the new product landing page including mobile responsive design.',
+    title: 'Master Star Platinum abilities',
+    description: 'Train to unlock the full potential of Star Platinum\'s time-stopping power and precision strikes.',
     status: 'todo',
     deadline: '2024-02-15',
     createdAt: '2024-01-20T10:00:00Z'
   },
   {
     id: '2', 
-    title: 'Set up analytics tracking',
-    description: 'Implement Google Analytics and custom event tracking for user interactions.',
+    title: 'Investigate Stand Arrow mystery',
+    description: 'Research the origins and powers of the mysterious Stand Arrows that grant supernatural abilities.',
     status: 'in-progress',
     deadline: '2024-02-10',
     createdAt: '2024-01-18T14:30:00Z'
   },
   {
     id: '3',
-    title: 'Write API documentation', 
-    description: 'Complete comprehensive API documentation with examples and use cases.',
+    title: 'Defeat DIO once and for all', 
+    description: 'Complete the ultimate showdown with the immortal vampire DIO to save the world.',
     status: 'done',
     createdAt: '2024-01-15T09:15:00Z'
   },
   {
     id: '4',
-    title: 'User testing session prep',
-    description: 'Prepare test scenarios and recruit participants for upcoming user testing sessions.',
+    title: 'Recruit new Stand users',
+    description: 'Find and train new Stand users to join the bizarre adventure and protect innocent people.',
     status: 'todo',
     deadline: '2024-02-20',
     createdAt: '2024-01-22T11:45:00Z'
@@ -150,18 +150,23 @@ export function Dashboard() {
               )}
             </div>
             <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">{user?.avatar}</span>
-                <span className="text-foreground font-medium">{user?.username}</span>
+              <div className="flex items-center gap-3">
+                <div className="text-3xl animate-pulse jojo-animate">{user?.avatar}</div>
+                <div>
+                  <div className="text-foreground font-bold jojo-text">{user?.username}</div>
+                  <div className="text-xs text-purple-300 font-bold">
+                    🌟 Stand: {user?.stand || 'Unknown Stand'} 🌟
+                  </div>
+                </div>
               </div>
               <Button 
                 variant="outline" 
                 size="sm" 
                 onClick={logout}
-                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground"
+                className="text-destructive border-destructive hover:bg-destructive hover:text-destructive-foreground jojo-glow"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                Za Warudo... Logout
               </Button>
             </div>
           </div>

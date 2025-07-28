@@ -5,7 +5,7 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, playZaWarudoSound } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import jojoBackground from '@/assets/jojo-bg.jpg';
 
@@ -46,6 +46,9 @@ const Login: React.FC = () => {
   });
 
   const onLogin = async (data: LoginFormData) => {
+    // Play ZA WARUDO sound effect
+    playZaWarudoSound();
+    
     const success = await login(data.email, data.password);
     if (!success) {
       toast({
@@ -53,16 +56,31 @@ const Login: React.FC = () => {
         description: "Invalid email or password. Try jotaro@jojo.com with starplatinum",
         variant: "destructive",
       });
+    } else {
+      toast({
+        title: "ORA ORA! Welcome back!",
+        description: "Successfully logged in, Stand User!",
+        variant: "default",
+      });
     }
   };
 
   const onSignup = async (data: SignupFormData) => {
+    // Play ZA WARUDO sound effect
+    playZaWarudoSound();
+    
     const success = await signup(data.email, data.password, data.username);
     if (!success) {
       toast({
         title: "Signup Failed",
         description: "User with this email already exists",
         variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "MUDA MUDA! Stand User Created!",
+        description: "Your JoJo character has been assigned!",
+        variant: "default",
       });
     }
   };

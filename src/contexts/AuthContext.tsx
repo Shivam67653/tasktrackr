@@ -5,6 +5,7 @@ interface User {
   email: string;
   username: string;
   avatar?: string;
+  stand?: string;
 }
 
 interface AuthContextType {
@@ -17,6 +18,18 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// JoJo character avatars for random assignment
+const jojoAvatars = [
+  { emoji: '⭐', name: 'Jotaro Kujo', stand: 'Star Platinum' },
+  { emoji: '🌍', name: 'DIO', stand: 'The World' },
+  { emoji: '🌟', name: 'Giorno Giovanna', stand: 'Gold Experience' },
+  { emoji: '💜', name: 'Josuke Higashikata', stand: 'Crazy Diamond' },
+  { emoji: '🔥', name: 'Joseph Joestar', stand: 'Hermit Purple' },
+  { emoji: '⚡', name: 'Jonathan Joestar', stand: 'Hamon' },
+  { emoji: '🌊', name: 'Jolyne Cujoh', stand: 'Stone Free' },
+  { emoji: '🎭', name: 'Johnny Joestar', stand: 'Tusk' }
+];
+
 // Mock users data - in real app this would be in a database
 const mockUsers = [
   {
@@ -24,16 +37,54 @@ const mockUsers = [
     email: 'jotaro@jojo.com',
     password: 'starplatinum',
     username: 'Jotaro Kujo',
-    avatar: '⭐'
+    avatar: '⭐',
+    stand: 'Star Platinum'
   },
   {
     id: '2',
     email: 'dio@jojo.com',
     password: 'theworld',
     username: 'DIO',
-    avatar: '🌍'
+    avatar: '🌍',
+    stand: 'The World'
   }
 ];
+
+// ZA WARUDO sound effect function
+const playZaWarudoSound = () => {
+  try {
+    // Create audio context and play "ZA WARUDO" sound effect
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const audioContext = new AudioContextClass();
+    
+    // Create a simple beep sequence that sounds like "ZA WARUDO"
+    const playBeep = (frequency: number, duration: number, delay: number) => {
+      setTimeout(() => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.type = 'square';
+        
+        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+        
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + duration);
+      }, delay);
+    };
+    
+    // "ZA" - "WAR" - "UDO" sound pattern
+    playBeep(200, 0.2, 0);     // ZA
+    playBeep(150, 0.3, 300);   // WAR
+    playBeep(100, 0.4, 700);   // UDO
+  } catch (error) {
+    console.log('Audio not supported or blocked:', error);
+  }
+};
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -64,7 +115,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         id: foundUser.id,
         email: foundUser.email,
         username: foundUser.username,
-        avatar: foundUser.avatar
+        avatar: foundUser.avatar,
+        stand: foundUser.stand
       };
       
       // Mock JWT token
@@ -95,13 +147,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return false;
     }
     
+    // Assign random JoJo character
+    const randomJojo = jojoAvatars[Math.floor(Math.random() * jojoAvatars.length)];
+    
     // Create new user
     const newUser = {
       id: String(mockUsers.length + 1),
       email,
       password,
       username,
-      avatar: '🆕'
+      avatar: randomJojo.emoji,
+      stand: randomJojo.stand
     };
     
     mockUsers.push(newUser);
@@ -110,7 +166,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       id: newUser.id,
       email: newUser.email,
       username: newUser.username,
-      avatar: newUser.avatar
+      avatar: newUser.avatar,
+      stand: newUser.stand
     };
     
     // Mock JWT token
@@ -144,3 +201,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+export { playZaWarudoSound };
