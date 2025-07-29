@@ -9,7 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTask, Task } from '@/contexts/TaskContext';
 
 export function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
   const { 
     tasks, 
     boards, 
@@ -101,10 +101,10 @@ export function Dashboard() {
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-3">
                 {/* User Avatar - Show image if available, fallback to emoji */}
-                {user?.imageUrl ? (
+                {profile?.avatar_url ? (
                   <img 
-                    src={user.imageUrl} 
-                    alt={user.username}
+                    src={profile.avatar_url} 
+                    alt={profile.username}
                     className="w-12 h-12 rounded-full border-2 border-purple-500 jojo-glow animate-pulse"
                     onError={(e) => {
                       // Fallback to emoji if image fails to load
@@ -119,14 +119,14 @@ export function Dashboard() {
                 ) : null}
                 <div 
                   className="text-3xl animate-pulse jojo-animate"
-                  style={{ display: user?.imageUrl ? 'none' : 'block' }}
+                  style={{ display: profile?.avatar_url ? 'none' : 'block' }}
                 >
-                  {user?.avatar}
+                  {profile?.avatar_emoji}
                 </div>
                 <div>
-                  <div className="text-foreground font-bold jojo-text">{user?.username}</div>
+                  <div className="text-foreground font-bold jojo-text">{profile?.username || user?.email}</div>
                   <div className="text-xs text-purple-300 font-bold">
-                    🌟 Stand: {user?.stand || 'Unknown Stand'} 🌟
+                    🌟 Stand: {profile?.stand_name || 'Unknown Stand'} 🌟
                   </div>
                 </div>
               </div>

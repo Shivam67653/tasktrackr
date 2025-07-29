@@ -1,181 +1,299 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useAuth } from './AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface Task {
   id: string;
   title: string;
   description: string;
   status: 'todo' | 'in-progress' | 'done';
-  deadline?: string;
+  priority: 'low' | 'medium' | 'high';
+  dueDate?: string;
   createdAt: string;
-  userId: string; // Add userId to tasks
+  updatedAt: string;
+  userId: string;
+  boardId?: string;
 }
 
 export interface Board {
   id: string;
   name: string;
+  description?: string;
   color: string;
-  userId: string; // Add userId to boards
+  createdAt: string;
+  updatedAt: string;
+  userId: string;
 }
 
 interface TaskContextType {
   tasks: Task[];
   boards: Board[];
-  activeBoard: string;
-  setActiveBoard: (boardId: string) => void;
-  createTask: (taskData: Omit<Task, 'id' | 'createdAt' | 'userId'>) => void;
-  updateTask: (taskId: string, taskData: Partial<Task>) => void;
-  deleteTask: (taskId: string) => void;
-  createBoard: (boardData: Omit<Board, 'id' | 'userId'>) => void;
+  activeBoard: string | null;
+  setActiveBoard: (boardId: string | null) => void;
+  createTask: (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => Promise<void>;
+  updateTask: (taskId: string, taskData: Partial<Task>) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
+  createBoard: (boardData: { name: string; color: string; description?: string }) => Promise<void>;
   getTasksByStatus: (status: Task['status']) => Task[];
+  isLoading: boolean;
 }
 
 const TaskContext = createContext<TaskContextType | undefined>(undefined);
 
-// JoJo-themed default boards for new users
-const createDefaultBoards = (userId: string): Board[] => [
-  { id: `${userId}_1`, name: 'Stand User Missions', color: '#9932cc', userId },
-  { id: `${userId}_2`, name: 'Bizarre Adventure Tasks', color: '#ff1493', userId },
-  { id: `${userId}_3`, name: 'Golden Experience Goals', color: '#ffd700', userId }
-];
-
-// JoJo-themed default tasks for new users
-const createDefaultTasks = (userId: string, boardId: string): Task[] => [
-  {
-    id: `${userId}_task_1`,
-    title: 'Master Star Platinum abilities',
-    description: 'Train to unlock the full potential of Star Platinum\'s time-stopping power and precision strikes.',
-    status: 'todo',
-    deadline: '2024-02-15',
-    createdAt: new Date().toISOString(),
-    userId
-  },
-  {
-    id: `${userId}_task_2`, 
-    title: 'Investigate Stand Arrow mystery',
-    description: 'Research the origins and powers of the mysterious Stand Arrows that grant supernatural abilities.',
-    status: 'in-progress',
-    deadline: '2024-02-10',
-    createdAt: new Date().toISOString(),
-    userId
-  },
-  {
-    id: `${userId}_task_3`,
-    title: 'Defeat DIO once and for all', 
-    description: 'Complete the ultimate showdown with the immortal vampire DIO to save the world.',
-    status: 'done',
-    createdAt: new Date().toISOString(),
-    userId
-  }
-];
-
 export const TaskProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [boards, setBoards] = useState<Board[]>([]);
-  const [activeBoard, setActiveBoard] = useState<string>('');
+  const [activeBoard, setActiveBoard] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { user, session } = useAuth();
 
-  // Initialize user data when user logs in
-  useEffect(() => {
-    if (user) {
-      const storageKey = `tasktrackr_${user.id}`;
-      const stored = localStorage.getItem(storageKey);
-      
-      if (stored) {
-        const { tasks: storedTasks, boards: storedBoards, activeBoard: storedActiveBoard } = JSON.parse(stored);
-        setTasks(storedTasks);
-        setBoards(storedBoards);
-        setActiveBoard(storedActiveBoard || storedBoards[0]?.id || '');
-      } else {
-        // Create default data for new user
-        const defaultBoards = createDefaultBoards(user.id);
-        const defaultTasks = createDefaultTasks(user.id, defaultBoards[0].id);
-        
-        setBoards(defaultBoards);
-        setTasks(defaultTasks);
-        setActiveBoard(defaultBoards[0].id);
-        
-        // Save to localStorage
-        localStorage.setItem(storageKey, JSON.stringify({
-          tasks: defaultTasks,
-          boards: defaultBoards,
-          activeBoard: defaultBoards[0].id
-        }));
-      }
-    } else {
-      // Clear data when user logs out
+  // Load user's boards and tasks
+  const loadData = async () => {
+    if (!user || !session) {
       setTasks([]);
       setBoards([]);
-      setActiveBoard('');
+      setActiveBoard(null);
+      setIsLoading(false);
+      return;
     }
-  }, [user]);
 
-  // Save to localStorage whenever data changes
+    try {
+      setIsLoading(true);
+
+      // Load boards
+      const { data: boardsData, error: boardsError } = await supabase
+        .from('boards')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true });
+
+      if (boardsError) {
+        console.error('Error loading boards:', boardsError);
+      } else {
+        const mappedBoards = boardsData.map(board => ({
+          id: board.id,
+          name: board.name,
+          description: board.description,
+          color: '#8B5CF6', // Default purple color for now
+          createdAt: board.created_at,
+          updatedAt: board.updated_at,
+          userId: board.user_id
+        }));
+        setBoards(mappedBoards);
+        
+        // Set first board as active if none selected
+        if (!activeBoard && mappedBoards.length > 0) {
+          setActiveBoard(mappedBoards[0].id);
+        }
+      }
+
+      // Load tasks
+      const { data: tasksData, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (tasksError) {
+        console.error('Error loading tasks:', tasksError);
+      } else {
+        const mappedTasks = tasksData.map(task => ({
+          id: task.id,
+          title: task.title,
+          description: task.description || '',
+          status: task.status as Task['status'],
+          priority: task.priority as Task['priority'],
+          dueDate: task.due_date,
+          createdAt: task.created_at,
+          updatedAt: task.updated_at,
+          userId: task.user_id,
+          boardId: task.board_id
+        }));
+        setTasks(mappedTasks);
+      }
+    } catch (error) {
+      console.error('Error loading data:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (user && boards.length > 0) {
-      const storageKey = `tasktrackr_${user.id}`;
-      localStorage.setItem(storageKey, JSON.stringify({
-        tasks,
-        boards,
-        activeBoard
-      }));
+    loadData();
+  }, [user, session]);
+
+  const createTask = async (taskData: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'userId'>) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('tasks')
+        .insert([
+          {
+            title: taskData.title,
+            description: taskData.description,
+            status: taskData.status,
+            priority: taskData.priority,
+            due_date: taskData.dueDate,
+            user_id: user.id,
+            board_id: taskData.boardId || activeBoard
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating task:', error);
+        return;
+      }
+
+      const newTask: Task = {
+        id: data.id,
+        title: data.title,
+        description: data.description || '',
+        status: data.status as Task['status'],
+        priority: data.priority as Task['priority'],
+        dueDate: data.due_date,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        userId: data.user_id,
+        boardId: data.board_id
+      };
+
+      setTasks(prevTasks => [newTask, ...prevTasks]);
+    } catch (error) {
+      console.error('Error creating task:', error);
     }
-  }, [user, tasks, boards, activeBoard]);
+  };
 
-  const createTask = (taskData: Omit<Task, 'id' | 'createdAt' | 'userId'>) => {
+  const updateTask = async (taskId: string, taskData: Partial<Task>) => {
     if (!user) return;
-    
-    const newTask: Task = {
-      ...taskData,
-      id: `${user.id}_task_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      userId: user.id
-    };
-    
-    setTasks(prev => [...prev, newTask]);
+
+    try {
+      const updateData: any = {};
+      
+      if (taskData.title !== undefined) updateData.title = taskData.title;
+      if (taskData.description !== undefined) updateData.description = taskData.description;
+      if (taskData.status !== undefined) updateData.status = taskData.status;
+      if (taskData.priority !== undefined) updateData.priority = taskData.priority;
+      if (taskData.dueDate !== undefined) updateData.due_date = taskData.dueDate;
+      if (taskData.boardId !== undefined) updateData.board_id = taskData.boardId;
+
+      const { data, error } = await supabase
+        .from('tasks')
+        .update(updateData)
+        .eq('id', taskId)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating task:', error);
+        return;
+      }
+
+      const updatedTask: Task = {
+        id: data.id,
+        title: data.title,
+        description: data.description || '',
+        status: data.status as Task['status'],
+        priority: data.priority as Task['priority'],
+        dueDate: data.due_date,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        userId: data.user_id,
+        boardId: data.board_id
+      };
+
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === taskId ? updatedTask : task
+        )
+      );
+    } catch (error) {
+      console.error('Error updating task:', error);
+    }
   };
 
-  const updateTask = (taskId: string, taskData: Partial<Task>) => {
-    setTasks(prev => prev.map(task => 
-      task.id === taskId ? { ...task, ...taskData } : task
-    ));
-  };
-
-  const deleteTask = (taskId: string) => {
-    setTasks(prev => prev.filter(task => task.id !== taskId));
-  };
-
-  const createBoard = (boardData: Omit<Board, 'id' | 'userId'>) => {
+  const deleteTask = async (taskId: string) => {
     if (!user) return;
-    
-    const newBoard: Board = {
-      ...boardData,
-      id: `${user.id}_board_${Date.now()}`,
-      userId: user.id
-    };
-    
-    setBoards(prev => [...prev, newBoard]);
-    setActiveBoard(newBoard.id);
+
+    try {
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('id', taskId)
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting task:', error);
+        return;
+      }
+
+      setTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    } catch (error) {
+      console.error('Error deleting task:', error);
+    }
   };
 
-  const getTasksByStatus = (status: Task['status']) => {
-    return tasks.filter(task => task.status === status && task.userId === user?.id);
+  const createBoard = async (boardData: { name: string; color: string; description?: string }) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('boards')
+        .insert([
+          {
+            name: boardData.name,
+            description: boardData.description,
+            user_id: user.id
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating board:', error);
+        return;
+      }
+
+      const newBoard: Board = {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        color: boardData.color,
+        createdAt: data.created_at,
+        updatedAt: data.updated_at,
+        userId: data.user_id
+      };
+
+      setBoards(prevBoards => [...prevBoards, newBoard]);
+      setActiveBoard(newBoard.id);
+    } catch (error) {
+      console.error('Error creating board:', error);
+    }
   };
 
-  const value: TaskContextType = {
-    tasks: tasks.filter(task => task.userId === user?.id),
-    boards: boards.filter(board => board.userId === user?.id),
-    activeBoard,
-    setActiveBoard,
-    createTask,
-    updateTask,
-    deleteTask,
-    createBoard,
-    getTasksByStatus
+  const getTasksByStatus = (status: Task['status']): Task[] => {
+    return tasks.filter(task => 
+      task.status === status && 
+      (!activeBoard || task.boardId === activeBoard)
+    );
   };
 
   return (
-    <TaskContext.Provider value={value}>
+    <TaskContext.Provider value={{
+      tasks,
+      boards,
+      activeBoard,
+      setActiveBoard,
+      createTask,
+      updateTask,
+      deleteTask,
+      createBoard,
+      getTasksByStatus,
+      isLoading
+    }}>
       {children}
     </TaskContext.Provider>
   );

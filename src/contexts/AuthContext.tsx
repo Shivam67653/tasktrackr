@@ -1,97 +1,30 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { User, Session } from '@supabase/supabase-js';
 
-interface User {
+interface Profile {
   id: string;
-  email: string;
   username: string;
-  avatar?: string;
-  stand?: string;
-  imageUrl?: string;
+  avatar_emoji: string;
+  stand_name: string;
+  avatar_url?: string;
+}
+
+interface AuthUser extends User {
+  profile?: Profile;
 }
 
 interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  signup: (email: string, password: string, username: string) => Promise<boolean>;
-  logout: () => void;
+  user: AuthUser | null;
+  session: Session | null;
+  profile: Profile | null;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (email: string, password: string, username: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => Promise<void>;
   isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-// JoJo character avatars with actual image URLs
-const jojoAvatars = [
-  { 
-    emoji: '⭐', 
-    name: 'Jotaro Kujo', 
-    stand: 'Star Platinum',
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '🌍', 
-    name: 'DIO', 
-    stand: 'The World',
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '🌟', 
-    name: 'Giorno Giovanna', 
-    stand: 'Gold Experience',
-    imageUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '💜', 
-    name: 'Josuke Higashikata', 
-    stand: 'Crazy Diamond',
-    imageUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '🔥', 
-    name: 'Joseph Joestar', 
-    stand: 'Hermit Purple',
-    imageUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '⚡', 
-    name: 'Jonathan Joestar', 
-    stand: 'Hamon Energy',
-    imageUrl: 'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '🌊', 
-    name: 'Jolyne Cujoh', 
-    stand: 'Stone Free',
-    imageUrl: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=100&h=100&fit=crop&crop=face'
-  },
-  { 
-    emoji: '🎭', 
-    name: 'Johnny Joestar', 
-    stand: 'Tusk Act 4',
-    imageUrl: 'https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=100&h=100&fit=crop&crop=face'
-  }
-];
-
-// Mock users data - in real app this would be in a database
-const mockUsers = [
-  {
-    id: '1',
-    email: 'jotaro@jojo.com',
-    password: 'starplatinum',
-    username: 'Jotaro Kujo',
-    avatar: '⭐',
-    stand: 'Star Platinum',
-    imageUrl: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=100&fit=crop&crop=face'
-  },
-  {
-    id: '2',
-    email: 'dio@jojo.com',
-    password: 'theworld',
-    username: 'DIO',
-    avatar: '🌍',
-    stand: 'The World',
-    imageUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop&crop=face'
-  }
-];
 
 // ZA WARUDO sound effect function
 const playZaWarudoSound = () => {
@@ -130,111 +63,142 @@ const playZaWarudoSound = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Check for stored token on mount
-    const token = localStorage.getItem('tasktrackr_token');
-    const userData = localStorage.getItem('tasktrackr_user');
-    
-    if (token && userData) {
-      setUser(JSON.parse(userData));
+  // Fetch user profile from database
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return null;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+      return null;
     }
-    
-    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setIsLoading(true);
+        
+        if (session?.user) {
+          const userProfile = await fetchProfile(session.user.id);
+          setProfile(userProfile);
+          setUser({ ...session.user, profile: userProfile });
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    // Check for existing session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      setSession(session);
+      
+      if (session?.user) {
+        const userProfile = await fetchProfile(session.user.id);
+        setProfile(userProfile);
+        setUser({ ...session.user, profile: userProfile });
+      }
+      
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    const foundUser = mockUsers.find(u => u.email === email && u.password === password);
-    
-    if (foundUser) {
-      const userData = {
-        id: foundUser.id,
-        email: foundUser.email,
-        username: foundUser.username,
-        avatar: foundUser.avatar,
-        stand: foundUser.stand,
-        imageUrl: foundUser.imageUrl
-      };
+  const login = async (email: string, password: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setIsLoading(true);
       
-      // Mock JWT token
-      const mockToken = `mock_jwt_${foundUser.id}_${Date.now()}`;
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        setIsLoading(false);
+        return { success: false, error: error.message };
+      }
+
+      // Play ZA WARUDO sound on successful login
+      playZaWarudoSound();
       
-      localStorage.setItem('tasktrackr_token', mockToken);
-      localStorage.setItem('tasktrackr_user', JSON.stringify(userData));
-      
-      setUser(userData);
+      return { success: true };
+    } catch (error) {
       setIsLoading(false);
-      return true;
+      return { success: false, error: 'An unexpected error occurred' };
     }
-    
-    setIsLoading(false);
-    return false;
   };
 
-  const signup = async (email: string, password: string, username: string): Promise<boolean> => {
-    setIsLoading(true);
-    
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Check if user already exists
-    const existingUser = mockUsers.find(u => u.email === email);
-    if (existingUser) {
+  const signup = async (email: string, password: string, username: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      setIsLoading(true);
+      
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            username: username,
+          }
+        }
+      });
+
+      if (error) {
+        setIsLoading(false);
+        return { success: false, error: error.message };
+      }
+
+      // Play ZA WARUDO sound on successful signup
+      playZaWarudoSound();
+      
+      return { success: true };
+    } catch (error) {
       setIsLoading(false);
-      return false;
+      return { success: false, error: 'An unexpected error occurred' };
     }
-    
-    // Assign random JoJo character
-    const randomJojo = jojoAvatars[Math.floor(Math.random() * jojoAvatars.length)];
-    
-    // Create new user
-    const newUser = {
-      id: String(mockUsers.length + 1),
-      email,
-      password,
-      username,
-      avatar: randomJojo.emoji,
-      stand: randomJojo.stand,
-      imageUrl: randomJojo.imageUrl
-    };
-    
-    mockUsers.push(newUser);
-    
-    const userData = {
-      id: newUser.id,
-      email: newUser.email,
-      username: newUser.username,
-      avatar: newUser.avatar,
-      stand: newUser.stand,
-      imageUrl: newUser.imageUrl
-    };
-    
-    // Mock JWT token
-    const mockToken = `mock_jwt_${newUser.id}_${Date.now()}`;
-    
-    localStorage.setItem('tasktrackr_token', mockToken);
-    localStorage.setItem('tasktrackr_user', JSON.stringify(userData));
-    
-    setUser(userData);
-    setIsLoading(false);
-    return true;
   };
 
-  const logout = () => {
-    localStorage.removeItem('tasktrackr_token');
-    localStorage.removeItem('tasktrackr_user');
-    setUser(null);
+  const logout = async (): Promise<void> => {
+    try {
+      await supabase.auth.signOut();
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, signup, logout, isLoading }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      profile, 
+      login, 
+      signup, 
+      logout, 
+      isLoading 
+    }}>
       {children}
     </AuthContext.Provider>
   );

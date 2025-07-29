@@ -10,10 +10,10 @@ interface TaskCardProps {
 }
 
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
-  const isOverdue = task.deadline && new Date(task.deadline) < new Date();
-  const isDueSoon = task.deadline && 
-    new Date(task.deadline) > new Date() && 
-    new Date(task.deadline).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000; // 24 hours
+  const isOverdue = task.dueDate && new Date(task.dueDate) < new Date();
+  const isDueSoon = task.dueDate && 
+    new Date(task.dueDate) > new Date() && 
+    new Date(task.dueDate).getTime() - new Date().getTime() < 24 * 60 * 60 * 1000; // 24 hours
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -80,10 +80,10 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         </Badge>
 
         {/* Deadline */}
-        {task.deadline && (
+        {task.dueDate && (
           <div className={`flex items-center gap-1 text-xs ${getDeadlineColor()}`}>
             <Calendar className="h-3 w-3" />
-            <span>{formatDate(task.deadline)}</span>
+            <span>{formatDate(task.dueDate)}</span>
             {(isOverdue || isDueSoon) && (
               <Clock className="h-3 w-3" />
             )}

@@ -46,41 +46,35 @@ const Login: React.FC = () => {
   });
 
   const onLogin = async (data: LoginFormData) => {
-    // Play ZA WARUDO sound effect
-    playZaWarudoSound();
-    
-    const success = await login(data.email, data.password);
-    if (!success) {
-      toast({
-        title: "Login Failed",
-        description: "Invalid email or password. Try jotaro@jojo.com with starplatinum",
-        variant: "destructive",
-      });
-    } else {
+    const result = await login(data.email, data.password);
+    if (result.success) {
       toast({
         title: "ORA ORA! Welcome back!",
         description: "Successfully logged in, Stand User!",
         variant: "default",
       });
+    } else {
+      toast({
+        title: "Login Failed",
+        description: result.error || "Invalid email or password",
+        variant: "destructive",
+      });
     }
   };
 
   const onSignup = async (data: SignupFormData) => {
-    // Play ZA WARUDO sound effect
-    playZaWarudoSound();
-    
-    const success = await signup(data.email, data.password, data.username);
-    if (!success) {
+    const result = await signup(data.email, data.password, data.username);
+    if (result.success) {
       toast({
-        title: "Signup Failed",
-        description: "User with this email already exists",
-        variant: "destructive",
+        title: "MUDA MUDA! Stand User Created!",
+        description: "Your JoJo character has been assigned! Check your email to confirm your account.",
+        variant: "default",
       });
     } else {
       toast({
-        title: "MUDA MUDA! Stand User Created!",
-        description: "Your JoJo character has been assigned!",
-        variant: "default",
+        title: "Signup Failed",
+        description: result.error || "An error occurred during signup",
+        variant: "destructive",
       });
     }
   };
@@ -259,12 +253,6 @@ const Login: React.FC = () => {
             </Button>
           </div>
 
-          {/* Demo credentials */}
-          <div className="mt-6 p-4 bg-purple-900/30 rounded-lg border border-purple-500/30">
-            <p className="text-xs text-purple-300 text-center mb-2 font-bold">DEMO CREDENTIALS:</p>
-            <p className="text-xs text-white text-center">Email: jotaro@jojo.com</p>
-            <p className="text-xs text-white text-center">Password: starplatinum</p>
-          </div>
         </div>
       </div>
     </div>

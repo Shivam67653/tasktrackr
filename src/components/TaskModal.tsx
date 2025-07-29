@@ -21,7 +21,7 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus = 'todo
     title: '',
     description: '',
     status: defaultStatus as Task['status'],
-    deadline: ''
+    dueDate: ''
   });
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus = 'todo
         title: task.title,
         description: task.description,
         status: task.status,
-        deadline: task.deadline || ''
+        dueDate: task.dueDate || ''
       });
     } else {
       setFormData({
