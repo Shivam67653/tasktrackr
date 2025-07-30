@@ -21,7 +21,8 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus = 'todo
     title: '',
     description: '',
     status: defaultStatus as Task['status'],
-    dueDate: ''
+    dueDate: '',
+    priority: 'medium' as Task['priority']
   });
 
   useEffect(() => {
@@ -30,14 +31,16 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus = 'todo
         title: task.title,
         description: task.description,
         status: task.status,
-        dueDate: task.dueDate || ''
+        dueDate: task.dueDate || '',
+        priority: task.priority
       });
     } else {
       setFormData({
         title: '',
         description: '',
         status: defaultStatus,
-        deadline: ''
+        dueDate: '',
+        priority: 'medium' as Task['priority']
       });
     }
   }, [task, defaultStatus, isOpen]);
@@ -50,14 +53,17 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus = 'todo
       title: formData.title.trim(),
       description: formData.description.trim(),
       status: formData.status,
-      deadline: formData.deadline || undefined
+      dueDate: formData.dueDate || undefined,
+      priority: formData.priority,
+      updatedAt: new Date().toISOString()
     });
 
     setFormData({
       title: '',
       description: '',
       status: defaultStatus,
-      deadline: ''
+      dueDate: '',
+      priority: 'medium' as Task['priority']
     });
     onClose();
   };
@@ -128,8 +134,8 @@ export function TaskModal({ isOpen, onClose, onSave, task, defaultStatus = 'todo
             <Input
               id="deadline"
               type="date"
-              value={formData.deadline}
-              onChange={(e) => handleInputChange('deadline', e.target.value)}
+              value={formData.dueDate}
+              onChange={(e) => handleInputChange('dueDate', e.target.value)}
               className="bg-input border-border focus:border-primary focus:ring-primary"
             />
           </div>
