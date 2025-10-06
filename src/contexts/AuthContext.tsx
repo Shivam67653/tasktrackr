@@ -167,17 +167,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
+        console.error('Signup error:', error);
         setIsLoading(false);
         return { success: false, error: error.message };
+      }
+
+      // Check if email confirmation is required
+      if (data?.user && !data.session) {
+        setIsLoading(false);
+        return { 
+          success: false, 
+          error: 'Please check your email to confirm your account. If you don\'t see the email, ask your admin to disable "Confirm email" in Supabase Auth settings.' 
+        };
       }
 
       // Play ZA WARUDO sound on successful signup
       playZaWarudoSound();
       
-      return { success: true };
-    } catch (error) {
       setIsLoading(false);
-      return { success: false, error: 'An unexpected error occurred' };
+      return { success: true };
+    } catch (error: any) {
+      console.error('Signup exception:', error);
+      setIsLoading(false);
+      return { success: false, error: error?.message || 'An unexpected error occurred' };
     }
   };
 
