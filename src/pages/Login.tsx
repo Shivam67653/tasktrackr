@@ -171,76 +171,66 @@ const Login: React.FC = () => {
               </form>
             </Form>
           ) : (
-            <Form {...signupForm}>
-              <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-6">
-                <FormField
-                  control={signupForm.control}
-                  name="username"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-pink-300 font-bold">Username</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="text"
-                          autoComplete="username"
-                          placeholder="Jotaro Kujo"
-                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400 relative z-10"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
+            <form onSubmit={signupForm.handleSubmit(onSignup)} className="space-y-6">
+              <div className="space-y-2">
+                <label htmlFor="signup-username" className="text-pink-300 font-bold text-sm">
+                  Username
+                </label>
+                <Input
+                  id="signup-username"
+                  type="text"
+                  autoComplete="username"
+                  placeholder="Jotaro Kujo"
+                  {...signupForm.register('username')}
+                  className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400"
                 />
+                {signupForm.formState.errors.username && (
+                  <p className="text-red-400 text-sm">{signupForm.formState.errors.username.message}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={signupForm.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-pink-300 font-bold">Email</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="email"
-                          autoComplete="email"
-                          placeholder="your@email.com"
-                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400 relative z-10"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
+              <div className="space-y-2">
+                <label htmlFor="signup-email" className="text-pink-300 font-bold text-sm">
+                  Email
+                </label>
+                <Input
+                  id="signup-email"
+                  type="email"
+                  autoComplete="email"
+                  placeholder="your@email.com"
+                  {...signupForm.register('email')}
+                  className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400"
                 />
+                {signupForm.formState.errors.email && (
+                  <p className="text-red-400 text-sm">{signupForm.formState.errors.email.message}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={signupForm.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-pink-300 font-bold">Password</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          type="password"
-                          placeholder="Choose a strong password"
-                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-400" />
-                    </FormItem>
-                  )}
+              <div className="space-y-2">
+                <label htmlFor="signup-password" className="text-pink-300 font-bold text-sm">
+                  Password
+                </label>
+                <Input
+                  id="signup-password"
+                  type="password"
+                  autoComplete="new-password"
+                  placeholder="Choose a strong password"
+                  {...signupForm.register('password')}
+                  className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400"
                 />
+                {signupForm.formState.errors.password && (
+                  <p className="text-red-400 text-sm">{signupForm.formState.errors.password.message}</p>
+                )}
+              </div>
 
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-black text-lg py-3 jojo-glow transition-all duration-300 hover:scale-105"
-                >
-                  {isLoading ? 'LOADING...' : '🌟 MUDA MUDA SIGNUP 🌟'}
-                </Button>
-              </form>
-            </Form>
+              <Button 
+                type="submit" 
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white font-black text-lg py-3 jojo-glow transition-all duration-300 hover:scale-105"
+              >
+                {isLoading ? 'LOADING...' : '🌟 MUDA MUDA SIGNUP 🌟'}
+              </Button>
+            </form>
           )}
 
           <div className="mt-8 text-center">
