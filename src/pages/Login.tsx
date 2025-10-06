@@ -182,8 +182,10 @@ const Login: React.FC = () => {
                       <FormControl>
                         <Input
                           {...field}
+                          type="text"
+                          autoComplete="username"
                           placeholder="Jotaro Kujo"
-                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400"
+                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400 relative z-10"
                         />
                       </FormControl>
                       <FormMessage className="text-red-400" />
@@ -201,8 +203,9 @@ const Login: React.FC = () => {
                         <Input
                           {...field}
                           type="email"
+                          autoComplete="email"
                           placeholder="your@email.com"
-                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400"
+                          className="bg-purple-900/50 border-pink-500/50 text-white placeholder:text-purple-300 focus:border-pink-400 focus:ring-pink-400 relative z-10"
                         />
                       </FormControl>
                       <FormMessage className="text-red-400" />
